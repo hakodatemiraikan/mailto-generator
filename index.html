@@ -31,7 +31,7 @@
       margin-top: 18px;
       margin-bottom: 6px;
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       box-sizing: border-box;
       padding: 12px;
@@ -39,10 +39,14 @@
       border-radius: 8px;
       font-size: 16px;
       font-family: inherit;
+      background: #fff;
     }
     textarea {
       min-height: 220px;
       white-space: pre-wrap;
+    }
+    .hidden {
+      display: none;
     }
     .button-row {
       display: flex;
@@ -127,14 +131,23 @@
     <h1>メールリンク生成ツール</h1>
     <p class="note">イベント名や本文を入力すると、WordPressのボタンリンクに貼れる mailtoリンクを自動生成します。</p>
 
-    <label for="email">送信先メールアドレス</label>
-    <input id="email" type="email" value="event_mirai@hakodate-miraikids.jp" />
+    <label for="emailSelect">送信先メールアドレス</label>
+    <select id="emailSelect" onchange="toggleCustomEmail(); generateLink();">
+      <option value="event_mirai@hakodate-miraikids.jp" selected>event_mirai@hakodate-miraikids.jp</option>
+      <option value="event_kids@hakodate-miraikids.jp">event_kids@hakodate-miraikids.jp</option>
+      <option value="other">その他のメールアドレスを入力</option>
+    </select>
+
+    <div id="customEmailWrap" class="hidden">
+      <label for="customEmail">その他の送信先メールアドレス</label>
+      <input id="customEmail" type="email" placeholder="example@example.com" oninput="generateLink()" />
+    </div>
 
     <label for="subject">メールタイトル</label>
-    <input id="subject" type="text" value="【親子科学ワークショップ：5月】申込" />
+    <input id="subject" type="text" value="【親子科学ワークショップ：5月】申込" oninput="generateLink()" />
 
     <label for="body">メール本文</label>
-    <textarea id="body">お名前：
+    <textarea id="body" oninput="generateLink()">お名前：
 ご年齢：
 希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
 【　】 ①10:30～
@@ -170,14 +183,36 @@
 
     <section class="preview">
       <strong>プレビュー</strong>
+      <p><strong>宛先：</strong><span id="previewEmail"></span></p>
       <p><strong>タイトル：</strong><span id="previewSubject"></span></p>
       <pre id="previewBody"></pre>
     </section>
   </main>
 
   <script>
+    function getSelectedEmail() {
+      const emailSelect = document.getElementById('emailSelect').value;
+      const customEmail = document.getElementById('customEmail').value.trim();
+
+      if (emailSelect === 'other') {
+        return customEmail;
+      }
+      return emailSelect;
+    }
+
+    function toggleCustomEmail() {
+      const emailSelect = document.getElementById('emailSelect').value;
+      const customEmailWrap = document.getElementById('customEmailWrap');
+
+      if (emailSelect === 'other') {
+        customEmailWrap.classList.remove('hidden');
+      } else {
+        customEmailWrap.classList.add('hidden');
+      }
+    }
+
     function generateLink() {
-      const email = document.getElementById('email').value.trim();
+      const email = getSelectedEmail();
       const subject = document.getElementById('subject').value;
       const body = document.getElementById('body').value;
 
@@ -187,6 +222,7 @@
       document.getElementById('outputLink').textContent = mailto;
       document.getElementById('outputHtml').textContent = html;
       document.getElementById('testLink').href = mailto;
+      document.getElementById('previewEmail').textContent = email || '未入力';
       document.getElementById('previewSubject').textContent = subject;
       document.getElementById('previewBody').textContent = body;
 
@@ -211,6 +247,7 @@
       copyText(document.getElementById('outputHtml').textContent);
     }
 
+    toggleCustomEmail();
     generateLink();
   </script>
 </body>
