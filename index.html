@@ -209,6 +209,52 @@
       } else {
         customEmailWrap.classList.add('hidden');
       }
+
+      applyTemplate(emailSelect);
+    }
+
+    function applyTemplate(emailType) {
+      const subjectInput = document.getElementById('subject');
+      const bodyInput = document.getElementById('body');
+
+      if (emailType === 'event_mirai@hakodate-miraikids.jp') {
+        subjectInput.value = '【親子科学ワークショップ：5月】申込';
+        bodyInput.value = `お名前：
+ご年齢：
+希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 ①10:30～
+【　】 ②14:00～
+電話番号：
+
+※今後のイベント案内について※
+次回以降、同様のイベントの開催が決まりましたら、メールにてご案内をお送りしてもよろしいでしょうか。
+（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 希望する
+【　】 希望しない`;
+      }
+
+      if (emailType === 'event_kids@hakodate-miraikids.jp') {
+        subjectInput.value = '【おたんじょうびかい：5月】申込';
+        bodyInput.value = `お誕生日：
+      
+お名前：
+ご年齢：
+希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 ①12:00～
+【　】 ②15:00～
+電話番号：
+
+※今後のイベント案内について※
+次回以降、同様のイベントの開催が決まりましたら、メールにてご案内をお送りしてもよろしいでしょうか。
+（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 希望する
+【　】 希望しない`;
+      }
+
+      generateLink();
+    } else {
+        customEmailWrap.classList.add('hidden');
+      }
     }
 
     function generateLink() {
