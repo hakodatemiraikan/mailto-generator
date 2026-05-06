@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>メールリンク生成ツール</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.7;
+      margin: 0;
+      padding: 24px;
+      background: #f7f7f7;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    h1 {
+      font-size: 24px;
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 220px;
+      white-space: pre-wrap;
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    button, .test-link {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button {
+      background: #f28c28;
+      color: #fff;
+    }
+    .secondary {
+      background: #555;
+    }
+    .test-link {
+      background: #1f7a4d;
+      color: #fff;
+    }
+    .output {
+      margin-top: 24px;
+      padding: 16px;
+      background: #f2f2f2;
+      border-radius: 12px;
+      word-break: break-all;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    .preview {
+      margin-top: 24px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .preview pre {
+      white-space: pre-wrap;
+      font-family: inherit;
+      margin: 0;
+    }
+    .note {
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>メールリンク生成ツール</h1>
+    <p class="note">イベント名や本文を入力すると、WordPressのボタンリンクに貼れる mailtoリンクを自動生成します。</p>
+
+    <label for="email">送信先メールアドレス</label>
+    <input id="email" type="email" value="event_mirai@hakodate-miraikids.jp" />
+
+    <label for="subject">メールタイトル</label>
+    <input id="subject" type="text" value="【親子科学ワークショップ：5月】申込" />
+
+    <label for="body">メール本文</label>
+    <textarea id="body">お名前：
+ご年齢：
+希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 ①10:30～
+【　】 ②14:00～
+電話番号：
+
+※今後のイベント案内について※
+次回以降、同様のイベントの開催が決まりましたら、メールにてご案内をお送りしてもよろしいでしょうか。
+（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 希望する
+【　】 希望しない</textarea>
+
+    <div class="button-row">
+      <button type="button" onclick="generateLink()">リンクを生成</button>
+      <button type="button" class="secondary" onclick="copyLink()">リンクをコピー</button>
+      <button type="button" class="secondary" onclick="copyHtml()">HTMLをコピー</button>
+      <a id="testLink" class="test-link" href="#">メール起動をテスト</a>
+    </div>
+
+    <label>生成された mailtoリンク</label>
+    <div id="outputLink" class="output"></div>
+
+    <label>HTMLコード</label>
+    <div id="outputHtml" class="output"></div>
+
+    <section class="preview">
+      <strong>プレビュー</strong>
+      <p><strong>タイトル：</strong><span id="previewSubject"></span></p>
+      <pre id="previewBody"></pre>
+    </section>
+  </main>
+
+  <script>
+    function generateLink() {
+      const email = document.getElementById('email').value.trim();
+      const subject = document.getElementById('subject').value;
+      const body = document.getElementById('body').value;
+
+      const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const html = `<a href="${mailto}">メールで申し込む</a>`;
+
+      document.getElementById('outputLink').textContent = mailto;
+      document.getElementById('outputHtml').textContent = html;
+      document.getElementById('testLink').href = mailto;
+      document.getElementById('previewSubject').textContent = subject;
+      document.getElementById('previewBody').textContent = body;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('コピーしました');
+      } catch (e) {
+        alert('コピーに失敗しました。表示された内容を手動でコピーしてください。');
+      }
+    }
+
+    function copyLink() {
+      copyText(document.getElementById('outputLink').textContent);
+    }
+
+    function copyHtml() {
+      copyText(document.getElementById('outputHtml').textContent);
+    }
+
+    generateLink();
+  </script>
+</body>
+</html>
