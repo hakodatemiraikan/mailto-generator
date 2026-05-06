@@ -102,4 +102,206 @@
       color: #666;
     }
     .qr-wrap {
-      text-align: ce
+      text-align: center;
+      margin-top: 12px;
+    }
+    #qrImage {
+      width: 220px;
+      height: 220px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      background: #fff;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      .container {
+        padding: 18px;
+      }
+      button, .test-link {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>メールリンク生成ツール</h1>
+    <p class="note">イベント名や本文を入力すると、WordPressのボタンリンクに貼れる mailtoリンクを自動生成します。</p>
+
+    <label for="emailSelect">送信先メールアドレス</label>
+    <select id="emailSelect">
+      <option value="event_mirai@hakodate-miraikids.jp" selected>event_mirai@hakodate-miraikids.jp</option>
+      <option value="event_kids@hakodate-miraikids.jp">event_kids@hakodate-miraikids.jp</option>
+      <option value="other">その他のメールアドレスを入力</option>
+    </select>
+
+    <div id="customEmailWrap" class="hidden">
+      <label for="customEmail">その他の送信先メールアドレス</label>
+      <input id="customEmail" type="email" placeholder="example@example.com" />
+    </div>
+
+    <label for="subject">メールタイトル</label>
+    <input id="subject" type="text" />
+
+    <label for="body">メール本文</label>
+    <textarea id="body"></textarea>
+
+    <div class="button-row">
+      <button type="button" id="generateButton">リンクを生成</button>
+      <button type="button" class="secondary" id="copyLinkButton">リンクをコピー</button>
+      <button type="button" class="secondary" id="copyHtmlButton">HTMLをコピー</button>
+      <a id="testLink" class="test-link" href="#">メール起動をテスト</a>
+    </div>
+
+    <label>生成された mailtoリンク</label>
+    <div id="outputLink" class="output"></div>
+
+    <label>HTMLコード</label>
+    <div id="outputHtml" class="output"></div>
+
+    <section class="qr-area">
+      <strong>スマートフォン確認用QRコード</strong>
+      <p class="note">スマートフォンで読み取ると、生成されたメールリンクを確認できます。</p>
+      <div class="qr-wrap">
+        <img id="qrImage" alt="メールリンク確認用QRコード" />
+      </div>
+    </section>
+
+    <section class="preview">
+      <strong>プレビュー</strong>
+      <p><strong>宛先：</strong><span id="previewEmail"></span></p>
+      <p><strong>タイトル：</strong><span id="previewSubject"></span></p>
+      <pre id="previewBody"></pre>
+    </section>
+  </main>
+
+  <script>
+    const templates = {
+      'event_mirai@hakodate-miraikids.jp': {
+        subject: '【親子科学ワークショップ：5月】申込',
+        body: `お名前：
+ご年齢：
+希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 ①10:30～
+【　】 ②14:00～
+電話番号：
+
+※今後のイベント案内について※
+次回以降、同様のイベントの開催が決まりましたら、メールにてご案内をお送りしてもよろしいでしょうか。
+（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 希望する
+【　】 希望しない`
+      },
+      'event_kids@hakodate-miraikids.jp': {
+        subject: '【おたんじょうびかい：5月】申込',
+        body: `お誕生日：
+ご年齢：
+希望時間：（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 ①12:00～
+【　】 ②15:00～
+電話番号：
+
+※今後のイベント案内について※
+次回以降、同様のイベントの開催が決まりましたら、メールにてご案内をお送りしてもよろしいでしょうか。
+（どちらかに〇をつけ、不要な項目は削除ください）
+【　】 希望する
+【　】 希望しない`
+      }
+    };
+
+    const emailSelect = document.getElementById('emailSelect');
+    const customEmailWrap = document.getElementById('customEmailWrap');
+    const customEmail = document.getElementById('customEmail');
+    const subjectInput = document.getElementById('subject');
+    const bodyInput = document.getElementById('body');
+    const outputLink = document.getElementById('outputLink');
+    const outputHtml = document.getElementById('outputHtml');
+    const testLink = document.getElementById('testLink');
+    const previewEmail = document.getElementById('previewEmail');
+    const previewSubject = document.getElementById('previewSubject');
+    const previewBody = document.getElementById('previewBody');
+    const qrImage = document.getElementById('qrImage');
+
+    function getSelectedEmail() {
+      if (emailSelect.value === 'other') {
+        return customEmail.value.trim();
+      }
+      return emailSelect.value;
+    }
+
+    function applyTemplate() {
+      const selected = emailSelect.value;
+
+      if (selected === 'other') {
+        customEmailWrap.classList.remove('hidden');
+        generateLink();
+        return;
+      }
+
+      customEmailWrap.classList.add('hidden');
+
+      if (templates[selected]) {
+        subjectInput.value = templates[selected].subject;
+        bodyInput.value = templates[selected].body;
+      }
+
+      generateLink();
+    }
+
+    function generateLink() {
+      const email = getSelectedEmail();
+      const subject = subjectInput.value;
+      const body = bodyInput.value;
+
+      if (!email) {
+        outputLink.textContent = 'メールアドレスを入力してください。';
+        outputHtml.textContent = 'メールアドレスを入力してください。';
+        testLink.href = '#';
+        previewEmail.textContent = '未入力';
+        previewSubject.textContent = subject;
+        previewBody.textContent = body;
+        qrImage.removeAttribute('src');
+        return;
+      }
+
+      const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const html = `<a href="${mailto}">メールで申し込む</a>`;
+
+      outputLink.textContent = mailto;
+      outputHtml.textContent = html;
+      testLink.href = mailto;
+      previewEmail.textContent = email;
+      previewSubject.textContent = subject;
+      previewBody.textContent = body;
+
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mailto)}`;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('コピーしました');
+      } catch (e) {
+        alert('コピーに失敗しました。表示された内容を手動でコピーしてください。');
+      }
+    }
+
+    emailSelect.addEventListener('change', applyTemplate);
+    customEmail.addEventListener('input', generateLink);
+    subjectInput.addEventListener('input', generateLink);
+    bodyInput.addEventListener('input', generateLink);
+    document.getElementById('generateButton').addEventListener('click', generateLink);
+    document.getElementById('copyLinkButton').addEventListener('click', function() {
+      copyText(outputLink.textContent);
+    });
+    document.getElementById('copyHtmlButton').addEventListener('click', function() {
+      copyText(outputHtml.textContent);
+    });
+
+    applyTemplate();
+  </script>
+</body>
+</html>
