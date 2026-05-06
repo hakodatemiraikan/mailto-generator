@@ -81,7 +81,7 @@
       font-size: 14px;
       white-space: pre-wrap;
     }
-    .preview {
+    .preview, .qr-area {
       margin-top: 24px;
       padding: 16px;
       border: 1px solid #ddd;
@@ -96,6 +96,29 @@
     .note {
       font-size: 14px;
       color: #666;
+    }
+    .qr-wrap {
+      text-align: center;
+      margin-top: 12px;
+    }
+    #qrImage {
+      width: 220px;
+      height: 220px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      background: #fff;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      .container {
+        padding: 18px;
+      }
+      button, .test-link {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -137,6 +160,14 @@
     <label>HTMLコード</label>
     <div id="outputHtml" class="output"></div>
 
+    <section class="qr-area">
+      <strong>スマートフォン確認用QRコード</strong>
+      <p class="note">スマートフォンで読み取ると、生成されたメールリンクを確認できます。</p>
+      <div class="qr-wrap">
+        <img id="qrImage" alt="メールリンク確認用QRコード" />
+      </div>
+    </section>
+
     <section class="preview">
       <strong>プレビュー</strong>
       <p><strong>タイトル：</strong><span id="previewSubject"></span></p>
@@ -158,6 +189,9 @@
       document.getElementById('testLink').href = mailto;
       document.getElementById('previewSubject').textContent = subject;
       document.getElementById('previewBody').textContent = body;
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mailto)}`;
+      document.getElementById('qrImage').src = qrUrl;
     }
 
     async function copyText(text) {
